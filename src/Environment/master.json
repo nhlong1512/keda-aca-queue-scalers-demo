@@ -63,10 +63,15 @@
             "apiVersion": "2017-05-10",
             "name": "azureContainerAppsEnvironment",
             "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "[concat('Microsoft.ContainerRegistry/registries/', variables('registryName'))]",
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]",
+                "[concat('Microsoft.Insights/components/', variables('appInsightsName'))]"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/nested/acae.json",
+                    "uri": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/src/Environment/acae.json",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
