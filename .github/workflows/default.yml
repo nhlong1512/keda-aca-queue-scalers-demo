@@ -3,7 +3,7 @@ name: Build and deploy to Azure
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
