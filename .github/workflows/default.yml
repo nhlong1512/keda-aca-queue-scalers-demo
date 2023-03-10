@@ -1,0 +1,67 @@
+name: Build and deploy to Azure
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      comments:
+        description: Comments
+        type: string
+        required: false
+
+env:
+  SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
+  RESOURCEGROUP: keda-demo-rg
+  LOCATION: eastus
+  PREFIX: keda-demo
+
+jobs:
+  provision:
+    name: Provision
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Azure authentication
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Create Azure Resource Group
+      run: |
+        if [ $(az group exists --name ${{ env.RESOURCEGROUP }}) = false ]; then
+          az group create -n ${{ env.RESOURCEGROUP }} -l ${{ env.LOCATION }}
+        fi
+
+    - uses: azure/arm-deploy@v1
+      name: Create Azure Resources
+      id: createAzureResources
+      with:
+        subscriptionId: ${{ env.SUBSCRIPTIONID }}
+        resourceGroupName: ${{ env.RESOURCEGROUP }}
+        template: ./src/Environment/master.json
+        parameters: prefix="${{ env.PREFIX }}"
+
+  cleanup:
+    name: Clean Up
+    needs: [provision]
+    runs-on: ubuntu-latest
+    environment: 'cleanup'
+    steps:
+    - name: Azure authentication
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Delete Log Analytics Workspace
+      continue-on-error: true
+      run: |
+        az monitor log-analytics workspace delete -g ${{ env.RESOURCEGROUP }} \
+          --workspace-name ${{ env.LOGANALYTICSWORKSPACENAME }} \
+          --force true --yes
+
+    - name: Delete Resource Group
+      continue-on-error: true
+      run: |
+        az group delete -g ${{ env.RESOURCEGROUP }} --yes

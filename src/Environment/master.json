@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "type": "String",
+            "defaultValue": "keda-demo-"
+        }
+    },
+    "variables": {
+        "registryName": "[concat(parameters('prefix'), 'acr')]",
+        "registrySku": "S1 Standard",
+        "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
+        "logAnalyticsWorkspaceSku": "pergb2018",
+        "appInsightsName": "[concat(parameters('prefix'), 'appinsights')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "sku": {
+                "name": "[variables('registrySku')]"
+            },
+            "name": "[variables('registryName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "adminUserEnabled": true
+            }
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "name": "[variables('logAnalyticsWorkspaceName')]",
+            "location": "[resourceGroup().location]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "properties": {
+                "sku": {
+                    "name": "[variables('logAnalyticsWorkspaceSku')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('appInsightsName')]",
+            "type": "microsoft.insights/components",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2020-02-02-preview",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]"
+            ],
+            "properties": {
+                "ApplicationId": "[variables('appInsightsName')]",
+                "Application_Type": "web",
+                "Flow_Type": "Redfield",
+                "Request_Source": "IbizaAIExtension",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+            }
+        }
+    ],
+    "outputs": {
+        "registryName": {
+            "type": "String",
+            "value": "[variables('registryName')]"
+        },
+        "registryUsername": {
+            "type": "String",
+            "value": "[listKeys(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2017-10-01').username]"
+        },
+        "registryPassword": {
+            "type": "String",
+            "value": "[listKeys(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2017-10-01').password]"
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "String",
+            "value": "[variables('logAnalyticsWorkspaceName')]"
+        }
+    }
+}
