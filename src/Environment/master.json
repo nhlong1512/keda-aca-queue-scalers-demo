@@ -58,23 +58,5 @@
                 "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
             }
         }
-    ],
-    "outputs": {
-        "registryName": {
-            "type": "String",
-            "value": "[variables('registryName')]"
-        },
-        "registryUsername": {
-            "type": "String",
-            "value": "[listKeys(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2017-10-01').username]"
-        },
-        "registryPassword": {
-            "type": "String",
-            "value": "[listKeys(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2017-10-01').password]"
-        },
-        "logAnalyticsWorkspaceName": {
-            "type": "String",
-            "value": "[variables('logAnalyticsWorkspaceName')]"
-        }
-    }
+    ]
 }
