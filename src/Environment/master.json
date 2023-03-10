@@ -5,10 +5,14 @@
         "prefix": {
             "type": "String",
             "defaultValue": "keda-demo-"
+        }, 
+        "timestamp":{
+            "type": "String",
+            "defaultValue": "[utcNow('yyyyMMdd')]"
         }
     },
     "variables": {
-        "registryName": "[replace(concat(parameters('prefix'), 'acr', utcNow('yyyyHHmm')), '-','')]",
+        "registryName": "[replace(concat(parameters('prefix'), 'acr', parameters('timestamp')), '-','')]",
         "registrySku": "Standard",
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
