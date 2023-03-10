@@ -17,7 +17,8 @@
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
         "appInsightsName": "[concat(parameters('prefix'), 'appinsights')]",
-        "containerAppsEnvironmentName": "[concat(parameters('prefix'), 'acae')]"
+        "containerAppsEnvironmentName": "[concat(parameters('prefix'), 'acae')]",
+        "baseNestedTemplateUrl": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/src/Environment/"
     },
     "resources": [
         {
@@ -71,7 +72,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/src/Environment/acae.json",
+                    "uri": "[concat(variables('baseNestedTemplateUrl'),'acae.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -82,8 +83,27 @@
                         "value": "[variables('logAnalyticsWorkspaceName')]"
                     }
                 }
-            },
-            "dependsOn": []
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "storageAccountQueueReader",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "Microsoft.Resources/deployments/azureContainerAppsEnvironment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('baseNestedTemplateUrl'),'storage_queue_reader.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environmentName": {
+                        "value": "[variables('containerAppsEnvironmentName')]"
+                    }
+                }
+            }
         }
     ],
     "outputs": {

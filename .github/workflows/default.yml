@@ -9,7 +9,7 @@ env:
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
-  PREFIX: keda-demo
+  PREFIX: keda-demo-
 
 jobs:
   provision:

@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "String"
+        },
+        "storageAccountName": {
+            "type": "String",
+            "defaultValue": "[concat('sa',uniqueString(resourceGroup().id))]"
+        }
+    },
+    "variables": {
+        "queueName": "myqueue"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2022-09-01",
+            "name": "[parameters('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot",
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": "true",
+                "publicNetworkAccess": "Enabled",
+                "allowBlobPublicAccess": "true",
+                "allowSharedKeyAccess": "true",
+                "allowCrossTenantReplication": "true",
+                "defaultToOAuthAuthentication": "false",
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Allow",
+                    "ipRules": []
+                },
+                "dnsEndpointType": "Standard",
+                "encryption": {
+                    "keySource": "Microsoft.Storage",
+                    "services": {
+                        "blob": {
+                            "enabled": "true"
+                        },
+                        "file": {
+                            "enabled": "true"
+                        },
+                        "table": {
+                            "enabled": "true"
+                        },
+                        "queue": {
+                            "enabled": "true"
+                        }
+                    },
+                    "requireInfrastructureEncryption": "false"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+            "apiVersion": "2022-09-01",
+            "name": "[concat(parameters('storageAccountName'), '/default/', variables('queueName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ],
+            "properties": {
+                "metadata": {}
+            }
+        },
+        {
+            "name": "queuereader",
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2022-03-01",
+            "kind": "containerapp",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+                "configuration": {
+                    "activeRevisionsMode": "single",
+                    "secrets": [
+                        {
+                            "name": "queueconnection",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "mcr.microsoft.com/azuredocs/containerapps-queuereader",
+                            "name": "queuereader",
+                            "env": [
+                                {
+                                    "name": "QueueName",
+                                    "value": "[variables('queueName')]]"
+                                },
+                                {
+                                    "name": "QueueConnectionString",
+                                    "secretRef": "queueconnection"
+                                }
+                            ]
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 1,
+                        "maxReplicas": 10,
+                        "rules": [
+                            {
+                                "name": "myqueuerule",
+                                "azureQueue": {
+                                    "queueName": "[variables('queueName')]",
+                                    "queueLength": 2,
+                                    "auth": [
+                                        {
+                                            "secretRef": "queueconnection",
+                                            "triggerParameter": "connection"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
