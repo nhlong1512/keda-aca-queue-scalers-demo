@@ -9,7 +9,7 @@
     },
     "variables": {
         "registryName": "[concat(parameters('prefix'), 'acr')]",
-        "registrySku": "S1 Standard",
+        "registrySku": "Standard",
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
         "appInsightsName": "[concat(parameters('prefix'), 'appinsights')]"
