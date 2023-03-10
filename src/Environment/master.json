@@ -8,7 +8,7 @@
         }
     },
     "variables": {
-        "registryName": "[concat(parameters('prefix'), 'acr')]",
+        "registryName": "[replace(concat(parameters('prefix'), 'acr'), '-','')]",
         "registrySku": "Standard",
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
