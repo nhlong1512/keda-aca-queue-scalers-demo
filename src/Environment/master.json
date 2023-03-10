@@ -5,8 +5,8 @@
         "prefix": {
             "type": "String",
             "defaultValue": "keda-demo-"
-        }, 
-        "timestamp":{
+        },
+        "timestamp": {
             "type": "String",
             "defaultValue": "[utcNow('yyyyMMdd')]"
         }
@@ -16,7 +16,8 @@
         "registrySku": "Standard",
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
-        "appInsightsName": "[concat(parameters('prefix'), 'appinsights')]"
+        "appInsightsName": "[concat(parameters('prefix'), 'appinsights')]",
+        "containerAppsEnvironmentName": "[concat(parameters('prefix'), 'acae')]"
     },
     "resources": [
         {
@@ -57,6 +58,27 @@
                 "Request_Source": "IbizaAIExtension",
                 "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
             }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "azureContainerAppsEnvironment",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/nested/acae.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "environmentName": {
+                        "value": "[variables('containerAppsEnvironmentName')]"
+                    },
+                    "workspaceName": {
+                        "value": "[variables('logAnalyticsWorkspaceName')]"
+                    }
+                }
+            },
+            "dependsOn": []
         }
     ],
     "outputs": {

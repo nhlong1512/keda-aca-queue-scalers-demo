@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "string"
+        },
+        "workspaceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('environmentName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "properties": {
+                "internalLoadBalancerEnabled": false,
+                "appLogsConfiguration": {
+                    "destination": "log-analytics",
+                    "logAnalyticsConfiguration": {
+                        "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2020-08-01').customerId]",
+                        "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2020-08-01').primarySharedKey]"
+                    }
+                }
+            },
+            "apiVersion": "2022-03-01",
+            "type": "Microsoft.App/managedEnvironments"
+        }
+    ]
+}
