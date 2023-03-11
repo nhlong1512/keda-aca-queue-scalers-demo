@@ -94,7 +94,7 @@
                             "env": [
                                 {
                                     "name": "QueueName",
-                                    "value": "[variables('queueName')]]"
+                                    "value": "[variables('queueName')]"
                                 },
                                 {
                                     "name": "QueueConnectionString",
