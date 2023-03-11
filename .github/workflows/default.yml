@@ -16,8 +16,8 @@ jobs:
     name: Provision
     runs-on: ubuntu-latest
     outputs:
-      queueName: ${{ steps.createAzureResources.outputs.queueName }}
-      queueConnectionString: ${{ steps.createAzureResources.outputs.queueConnectionString }}
+      queueName: ${{ steps.deploy.outputs.queueName }}
+      queueConnectionString: ${{ steps.deploy.outputs.queueConnectionString }}
     steps:
     - uses: actions/checkout@master
 
@@ -34,15 +34,20 @@ jobs:
 
     - uses: azure/arm-deploy@v1
       name: Create Azure Resources
-      id: createAzureResources
+      id: deploy
       with:
         subscriptionId: ${{ env.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/master.json
         parameters: prefix="${{ env.PREFIX }}"
 
+    - name: check outputs
+      run: |
+        echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
+        echo "Queue Connection String: ${{ steps.deploy.outputs.queueConnectionString }}"
+
   test:
-    name: Put message in queue
+    name: Put message in storage queue
     needs:  [provision]
     runs-on: ubuntu-latest
     strategy:
