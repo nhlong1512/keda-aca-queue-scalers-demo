@@ -122,6 +122,14 @@
         "logAnalyticsWorkspaceName": {
             "type": "String",
             "value": "[variables('logAnalyticsWorkspaceName')]"
+        },
+        "queueConnectionString": {
+            "type": "String",
+            "value": "[reference('storageAccountQueueReader').outputs.queueConnectionString.value]"
+        },
+        "queueName": {
+            "type": "String",
+            "value": "[reference('storageAccountQueueReader').outputs.queueName.value]"
         }
     }
 }
