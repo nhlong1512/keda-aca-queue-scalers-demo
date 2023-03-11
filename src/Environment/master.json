@@ -90,7 +90,7 @@
             "name": "storageAccountQueueReader",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "Microsoft.Resources/deployments/azureContainerAppsEnvironment"
+                "[concat('Microsoft.Resources/deployments/', 'azureContainerAppsEnvironment')]"
             ],
             "properties": {
                 "mode": "Incremental",
