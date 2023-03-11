@@ -96,7 +96,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[concat(variables('baseNestedTemplateUrl'),'storage_queue_reader.json')]",
-                    "contentVersion": "1.0.0.1"
+                    "contentVersion": "1.0.0.2"
                 },
                 "parameters": {
                     "environmentName": {
@@ -123,9 +123,9 @@
             "type": "String",
             "value": "[variables('logAnalyticsWorkspaceName')]"
         },
-        "queueConnectionString": {
+        "queueStorageAccountName": {
             "type": "String",
-            "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.queueConnectionString.value]"
+            "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.storageAccountName.value]"
         },
         "queueName": {
             "type": "String",

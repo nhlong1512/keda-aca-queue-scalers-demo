@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       queueName: ${{ steps.deploy.outputs.queueName }}
-      queueConnectionString: ${{ steps.deploy.outputs.queueConnectionString }}
+      queueConnectionString: ${{ steps.deploy.outputs.queueStorageAccountName }}
     steps:
     - uses: actions/checkout@master
 
@@ -44,7 +44,7 @@ jobs:
     - name: check outputs
       run: |
         echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
-        echo "Queue Connection String: ${{ steps.deploy.outputs.queueConnectionString }}"
+        echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
 
   test:
     name: Put message in storage queue
@@ -55,13 +55,23 @@ jobs:
       matrix:
         container: [1]
     steps:
+    - name: Azure authentication
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Retrieve Storage Account Connection
+      id: connectionString
+      run: |
+        echo "connectionString=$(az storage account show-connection-string -g ${{ env.RESOURCEGROUP }} --name "${{ needs.provision.outputs.queueStorageAccountName }}" --query connectionString --out json | tr -d '"')" >> "$GITHUB_OUTPUT"
+
     - name: Put message 1
       shell: bash
       run: |
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-1" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
+          --connection-string "${{ steps.connectionString.outputs.connectionString }}"
           
   cleanup:
     name: Clean Up

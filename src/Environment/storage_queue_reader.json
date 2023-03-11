@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.1",
+    "contentVersion": "1.0.0.2",
     "parameters": {
         "environmentName": {
             "type": "String"
@@ -127,9 +127,9 @@
         }
     ],
     "outputs": {
-        "queueConnectionString": {
+        "storageAccountName": {
             "type": "String",
-            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+            "value": "[parameters('storageAccountName')]"
         },
         "queueName": {
             "type": "String",
