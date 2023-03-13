@@ -22,27 +22,22 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - uses: azure/docker-login@v1
+    - name: Azure authentication
+      uses: azure/login@v1
       with:
-        login-server: ${{ secrets.ACR_USERNAME }}.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: ACR Build Producer
-      id: acrProducer
-      uses: azure/acr-build@v1
-      with:
-        registry: ${{ env.ACR }}
-        repository: ServiceBus
-        image: ServiceBusQueueProducer
-        folder: src/Apps/ServiceBus/ServiceBusQueueProducer
+      run: |
+        cd src/Apps/ServiceBus/ServiceBusQueueProducer
+        az acr build --image ServiceBus/ServiceBusQueueProducer:$GITHUB_SHA \
+          --registry $ACR \
+          --file Dockerfile .
 
     - name: ACR Build Reader
-      id: acrReader
-      uses: azure/acr-build@v1
-      with:
-        registry: ${{ env.ACR }}
-        repository: ServiceBus
-        image: ServiceBusQueueReader
-        folder: src/Apps/ServiceBus/ServiceBusQueueReader
+      run: |
+        cd src/Apps/ServiceBus/ServiceBusQueueReader
+        az acr build --image ServiceBus/ServiceBusQueueReader:$GITHUB_SHA \
+          --registry $ACR \
+          --file Dockerfile .
 
