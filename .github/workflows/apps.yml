@@ -30,14 +30,14 @@ jobs:
     - name: ACR Build Producer
       run: |
         cd src/Apps/ServiceBus/ServiceBusQueueProducer
-        az acr build --image ServiceBus/ServiceBusQueueProducer:${GITHUB_SHA::8} \
+        az acr build --image service-bus/queue-producer:${GITHUB_SHA::8} \
           --registry $ACR \
           --file Dockerfile .
 
     - name: ACR Build Reader
       run: |
         cd src/Apps/ServiceBus/ServiceBusQueueReader
-        az acr build --image ServiceBus/ServiceBusQueueReader:${GITHUB_SHA::8} \
+        az acr build --image service-bus/queue-reader:${GITHUB_SHA::8} \
           --registry $ACR \
           --file Dockerfile .
 
