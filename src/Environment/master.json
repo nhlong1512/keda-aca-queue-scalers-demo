@@ -104,6 +104,26 @@
                     }
                 }
             }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "serviceBusQueueReader",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "azureContainerAppsEnvironment"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('baseNestedTemplateUrl'),'service_bus_queue_reader.json')]",
+                    "contentVersion": "1.0.0.2"
+                },
+                "parameters": {
+                    "environmentName": {
+                        "value": "[variables('containerAppsEnvironmentName')]"
+                    }
+                }
+            }
         }
     ],
     "outputs": {
@@ -134,6 +154,10 @@
         "queueName": {
             "type": "String",
             "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.queueName.value]"
+        },
+        "serviceBusConnectionString": {
+            "type": "String",
+            "value": "[reference('serviceBusQueueReader', '2017-05-10').outputs.serviceBusConnectionString.value]"
         }
     }
 }

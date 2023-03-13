@@ -19,6 +19,7 @@ jobs:
       queueName: ${{ steps.deploy.outputs.queueName }}
       queueStorageAccountName: ${{ steps.deploy.outputs.queueStorageAccountName }}
       queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
+      serviceBusConnectionString: ${{ steps.deploy.outputs.serviceBusConnectionString }}
     steps:
     - uses: actions/checkout@master
 

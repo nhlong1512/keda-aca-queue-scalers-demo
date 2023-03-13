@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "String"
+        },
+        "serviceBusNamespaceName": {
+            "type": "String",
+            "defaultValue": "[concat('sb',uniqueString(resourceGroup().id))]"
+        }
+    },
+    "variables": {
+        "queueName": "myqueue",
+        "serviceBusDefaultSASKeyName": "RootManageSharedAccessKey",
+        "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('serviceBusDefaultSASKeyName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-04-01",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('serviceBusNamespaceName')]",
+            "resources": [
+                {
+                    "apiVersion": "2017-04-01",
+                    "name": "[variables('queueName')]",
+                    "type": "queues",
+                    "dependsOn": [
+                        "[concat('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
+                    ],
+                    "properties": {
+                        "path": "[variables('queueName')]"
+                    }
+                }
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "type": "Microsoft.ServiceBus/namespaces"
+        }
+    ],
+    "outputs": {
+        "serviceBusConnectionString": {
+            "type": "string",
+            "value": "[listkeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+        }
+    }
+}
