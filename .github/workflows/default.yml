@@ -127,9 +127,11 @@ jobs:
         az provider register --namespace Microsoft.App
         az provider register --namespace Microsoft.OperationalInsights
 
+        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $PREFIX-acae --resource-group $RESOURCE_GROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
+
         MESSAGES_PROCESSED = `az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'queuereader' and Log_s contains 'Message ID' | summarize count()" \
+          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
           --out tsv`
 
         echo 'messages processed: $MESSAGES_PROCESSED'
