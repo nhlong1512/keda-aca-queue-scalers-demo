@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - "./github/workflows/apps.yml"
+      - ".github/workflows/apps.yml"
       - "src/Apps/**"
 
 env:

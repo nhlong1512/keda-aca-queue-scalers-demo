@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "./github/workflows/apps.yml"
+      - ".github/workflows/apps.yml"
       - "src/Apps/**"
   workflow_dispatch:
     
