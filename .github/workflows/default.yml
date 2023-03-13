@@ -45,7 +45,7 @@ jobs:
     - name: Retrieve Storage Account Connection
       id: connectionString
       run: |
-        echo "connectionString=$(az storage account show-connection-string -g ${{ env.RESOURCEGROUP }} --name "${{ needs.provision.outputs.queueStorageAccountName }}" --query connectionString --out json | tr -d '"')" >> "$GITHUB_OUTPUT"
+        echo "connectionString=$(az storage account show-connection-string -g ${{ env.RESOURCEGROUP }} --name "${{ steps.deploy.outputs.queueStorageAccountName }}" --query connectionString --out json | tr -d '"')" >> "$GITHUB_OUTPUT"
 
     - name: check outputs
       run: |
