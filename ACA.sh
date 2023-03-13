@@ -1,9 +1,9 @@
 az provider register --namespace Microsoft.App
 az provider register --namespace Microsoft.OperationalInsights
 
-RESOURCE_GROUP="KEDA_DEMO"
+RESOURCE_GROUP="keda-demo-rg"
 LOCATION="eastus"
-CONTAINERAPPS_ENVIRONMENT="myacaenv"
+CONTAINERAPPS_ENVIRONMENT="keda-demo-acae"
 
 az containerapp env create \
   --name $CONTAINERAPPS_ENVIRONMENT \
@@ -43,4 +43,10 @@ LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $CONTAINERAPP
 az monitor log-analytics query \
   --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
   --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'queuereader' and Log_s contains 'Message ID' | project Time=TimeGenerated, AppName=ContainerAppName_s, Revision=RevisionName_s, Container=ContainerName_s, Message=Log_s | take 5" \
+  --out table
+
+
+az monitor log-analytics query \
+  --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+  --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('2023-03-13 00:00:00') | summarize count()" \
   --out table
