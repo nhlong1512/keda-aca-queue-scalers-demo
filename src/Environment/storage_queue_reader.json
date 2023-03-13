@@ -127,6 +127,10 @@
         }
     ],
     "outputs": {
+        "storageAccountConnectionString":{
+            "type": "String",
+            "value": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[0].value, ';BlobEndpoint=https://', parameters('storageAccountName'), '.blob.core.windows.net/;FileEndpoint=https://', parameters('storageAccountName'), '.file.core.windows.net/;QueueEndpoint=https://', parameters('storageAccountName'), '.queue.core.windows.net/;TableEndpoint=https://', parameters('storageAccountName'), '.table.core.windows.net/')]"
+        },
         "storageAccountName": {
             "type": "String",
             "value": "[parameters('storageAccountName')]"

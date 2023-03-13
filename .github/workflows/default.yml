@@ -18,7 +18,7 @@ jobs:
     outputs:
       queueName: ${{ steps.deploy.outputs.queueName }}
       queueStorageAccountName: ${{ steps.deploy.outputs.queueStorageAccountName }}
-      queueConnectionString: ${{ steps.connectionString.outputs.connectionString }}
+      queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
     steps:
     - uses: actions/checkout@master
 
@@ -42,16 +42,11 @@ jobs:
         template: ./src/Environment/master.json
         parameters: prefix="${{ env.PREFIX }}"
 
-    - name: Retrieve Storage Account Connection
-      id: connectionString
-      run: |
-        echo "connectionString=$(az storage account show-connection-string -g ${{ env.RESOURCEGROUP }} --name "${{ steps.deploy.outputs.queueStorageAccountName }}" --query connectionString --out json | tr -d '"')" >> "$GITHUB_OUTPUT"
-
     - name: check outputs
       run: |
         echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
         echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
-        echo "Storage Account Connection String: ${{ steps.connectionString.outputs.connectionString }}"
+        echo "Storage Account Connection String: ${{ steps.deploy.outputs.storageAccountConnectionString }}"
 
   testStorageQueue:
     name: Test Storage Queue

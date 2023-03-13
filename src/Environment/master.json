@@ -123,6 +123,10 @@
             "type": "String",
             "value": "[variables('logAnalyticsWorkspaceName')]"
         },
+        "storageAccountConnectionString": {
+            "type": "String",
+            "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.storageAccountConnectionString.value]"
+        },
         "queueStorageAccountName": {
             "type": "String",
             "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.storageAccountName.value]"
