@@ -130,7 +130,7 @@ jobs:
         NAME=$PREFIX"acae"
         LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
-        MESSAGES_PROCESSED = `az monitor log-analytics query \
+        MESSAGES_PROCESSED=`az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
           --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
           --out tsv`
