@@ -8,9 +8,14 @@
         "serviceBusName": {
             "type": "String",
             "defaultValue": "[concat('sb',uniqueString(resourceGroup().id))]"
+        },
+        "producerName":{
+            "type": "String",
+            "defaultValue": "[concat('sbp',utcNow('yyyyMMddHHmmss'))]"
         }
     },
     "variables": {
+        "registryName": "ramardeni",
         "queueName": "myqueue",
         "serviceBusDefaultSASKeyName": "RootManageSharedAccessKey",
         "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), variables('serviceBusDefaultSASKeyName'))]"
@@ -38,6 +43,117 @@
                 "tier": "Standard"
             },
             "type": "Microsoft.ServiceBus/namespaces"
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2022-10-01-preview",
+            "name": "[parameters('producerName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusName'))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('producerName')]",
+                        "properties": {
+                            "image": "ramardeni.azurecr.io/service-bus/queue-producer:8046b5f2",
+                            "ports": [],
+                            "environmentVariables": [
+                                {
+                                    "name": "ConnectionString",
+                                    "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+                                },
+                                {
+                                    "name": "QueueName",
+                                    "value": "myqueue"
+                                },
+                                {
+                                    "name": "NumberOfMessages",
+                                    "value": "100"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 2,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[concat(variables('registryName'),'.azurecr.io')]",
+                        "username": "[variables('registryName')]",
+                        "password": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').passwords[0].value]"
+                    }
+                ],
+                "osType": "Linux",
+                "restartPolicy": "Never"
+            }
+        },
+        {
+            "name": "servicebusqueuereader",
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2022-03-01",
+            "kind": "containerapp",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+                "configuration": {
+                    "activeRevisionsMode": "single",
+                    "secrets": [
+                        {
+                            "name": "queueconnection",
+                            "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "ramardeni.azurecr.io/service-bus/queue-reader:8046b5f2",
+                            "name": "queuereader",
+                            "env": [
+                                {
+                                    "name": "ConnectionString",
+                                    "secretRef": "queueconnection"
+                                },
+                                {
+                                    "name": "QueueName",
+                                    "value": "[variables('queueName')]"
+                                }
+                            ]
+                        }
+                    ],
+                    "scale": {
+                        "minReplicas": 1,
+                        "maxReplicas": 10,
+                        "rules": [
+                            {
+                                "name": "myqueuerule",
+                                "custom": {
+                                    "type": "azure-servicebus",
+                                    "metadata": {
+                                        "queueName": "[variables('queueName')]",
+                                        "namespace": "[parameters('serviceBusName')]",
+                                        "messageCount": "2"
+                                    },
+                                    "auth": [
+                                        {
+                                            "secretRef": "queueconnection",
+                                            "triggerParameter": "connection"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
         }
     ],
     "outputs": {
