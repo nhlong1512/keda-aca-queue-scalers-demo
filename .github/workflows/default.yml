@@ -55,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     steps:
     - name: Get current date
       id: date
@@ -127,7 +127,7 @@ jobs:
         az provider register --namespace Microsoft.App
         az provider register --namespace Microsoft.OperationalInsights
 
-        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $PREFIX-acae --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
+        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $PREFIXacae --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
         MESSAGES_PROCESSED = `az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
