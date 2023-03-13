@@ -116,7 +116,7 @@
                 "mode": "Incremental",
                 "templateLink": {
                     "uri": "[concat(variables('baseNestedTemplateUrl'),'service_bus_queue_reader.json')]",
-                    "contentVersion": "1.0.0.2"
+                    "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "environmentName": {
