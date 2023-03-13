@@ -1,0 +1,44 @@
+name: Build and deploy Apps to ACR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/Apps/**"
+
+env:
+  SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
+  RESOURCEGROUP: Demo
+  ACR: ramardeni
+
+jobs:
+  build:
+    name: Build Apps
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Azure authentication
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: ACR Build Producer
+      id: acrProducer
+      uses: azure/acr-build@v1
+      with:
+        registry: ${{ env.ACR }}
+        repository: ServiceBus
+        image: ServiceBusQueueProducer
+        folder: src/Apps/ServiceBus/ServiceBusQueueProducer
+
+    - name: ACR Build Reader
+      id: acrProducer
+      uses: azure/acr-build@v1
+      with:
+        registry: ${{ env.ACR }}
+        repository: ServiceBus
+        image: ServiceBusQueueReader
+        folder: src/Apps/ServiceBus/ServiceBusQueueReader
+
