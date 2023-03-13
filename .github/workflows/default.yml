@@ -51,7 +51,7 @@ jobs:
       run: |
         echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
         echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
-        echo "Storage Account Connection String: ${{ steps.deploy.outputs.connectionString }}"
+        echo "Storage Account Connection String: ${{ steps.connectionString.outputs.connectionString }}"
 
   testStorageQueue:
     name: Test Storage Queue
@@ -67,11 +67,6 @@ jobs:
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
-
-    - name: Azure authentication
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Put message 1
       shell: bash
