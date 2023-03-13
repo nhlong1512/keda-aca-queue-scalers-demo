@@ -70,7 +70,7 @@
             }
         },
         {
-            "name": "queuereader",
+            "name": "storagequeuereader",
             "type": "Microsoft.App/containerApps",
             "apiVersion": "2022-03-01",
             "kind": "containerapp",
