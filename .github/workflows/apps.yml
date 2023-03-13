@@ -7,6 +7,8 @@ on:
     paths:
       - "./github/workflows/apps.yml"
       - "src/Apps/**"
+  workflow_dispatch:
+    
 
 env:
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
