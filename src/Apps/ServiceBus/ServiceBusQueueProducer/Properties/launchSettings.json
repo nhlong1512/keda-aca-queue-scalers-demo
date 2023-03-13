@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "ServiceBusQueueProducer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConnectionString": "Endpoint=sb://sbsz6amg6ral7ue.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=UIirFEDRMCLuegWRfnsFK7x/oogJveT0E+ASbIrpjP8=",
+        "QueueName": "myqueue"
+      }
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
