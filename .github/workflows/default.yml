@@ -138,9 +138,9 @@ jobs:
         MESSAGES=${RESULT##* }
 
         if (( $MESSAGES >= 100 )); then
-          echo "Messages Process: $MESSAGES, Success"
+          echo "Messages Processed: $MESSAGES, Success"
         else
-          echo "Messages Process: $MESSAGES, FAILED!"
+          echo "Messages Processed: $MESSAGES, FAILED!"
           exit 1
         fi
 
