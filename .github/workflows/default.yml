@@ -51,6 +51,7 @@ jobs:
       run: |
         echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
         echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
+        echo "Storage Account Connection String: ${{ steps.deploy.outputs.connectionString }}"
 
   testStorageQueue:
     name: Test Storage Queue
