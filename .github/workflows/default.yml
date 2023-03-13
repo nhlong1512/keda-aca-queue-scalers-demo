@@ -126,12 +126,8 @@ jobs:
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
           --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
           --out tsv`
-        # Retain only the count of messages
-        MESSAGES=${RESULT##* }
-
-        echo "Messages: $MESSAGES"
-
-        if [ "$MESSAGES" -ge 5 ]; then
+        # Compare the number after the text PrimaryResult
+        if [ "${RESULT:14:3}" -ge 5 ]; then
           echo "Messages Processed: $MESSAGES, Success"
         else
           echo "Messages Processed: $MESSAGES, FAILED!"
