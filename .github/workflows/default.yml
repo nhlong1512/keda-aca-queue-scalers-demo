@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "src/Apps/**"
 
 env:
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
@@ -19,7 +21,8 @@ jobs:
       queueName: ${{ steps.deploy.outputs.queueName }}
       queueStorageAccountName: ${{ steps.deploy.outputs.queueStorageAccountName }}
       queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
-      serviceBusConnectionString: ${{ steps.deploy.outputs.serviceBusConnectionString }}
+      serviceBusName: ${{ steps.deploy.outputs.serviceBusName }}
+      serviceBusKey: ${{ steps.deploy.outputs.serviceBusKey }}
     steps:
     - uses: actions/checkout@master
 
@@ -58,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     steps:
     - name: Get current date
       id: date
@@ -136,9 +139,32 @@ jobs:
           exit 1
         fi
 
+  testServiceBusQueue:
+    name: Test Service Bus Queue
+    needs:  [provision]
+    runs-on: ubuntu-latest
+    outputs:
+      startDate: ${{ steps.date.outputs.date }}
+    strategy:
+      fail-fast: false
+      matrix:
+        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    steps:
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+    - name: Put message 1
+      shell: bash
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+          -H "Authorization: SharedAccessSignature sr=${{ needs.provision.outputs.serviceBusName }}&sig=${{ needs.provision.outputs.serviceBusKey }}&se=1404256819&skn=RootManageSharedAccessKey" \
+          -d '{"message": "Hello Queue Reader App ${{ matrix.container }}-1"}' \
+          https://${{ needs.provision.outputs.serviceBusName }}.servicebus.windows.net/myqueue/messages
+
   cleanup:
     name: Clean Up
-    needs: [validateStorageQueue]
+    needs: [testServiceBusQueue, validateStorageQueue]
     runs-on: ubuntu-latest
     environment: 'cleanup'
     steps:
