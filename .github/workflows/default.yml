@@ -127,7 +127,8 @@ jobs:
         az provider register --namespace Microsoft.App
         az provider register --namespace Microsoft.OperationalInsights
 
-        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $PREFIXacae --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
+        NAME=$PREFIX"acae"
+        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
         MESSAGES_PROCESSED = `az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
