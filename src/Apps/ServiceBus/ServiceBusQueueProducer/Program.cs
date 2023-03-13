@@ -14,9 +14,6 @@ namespace ServiceBusQueueProducer
             // the sender used to publish messages to the queue
             ServiceBusSender sender;
 
-            // number of messages to be sent to the queue
-            const int numOfMessages = 5;
-
             // The Service Bus client types are safe to cache and use as a singleton for the lifetime
             // of the application, which is best practice when messages are being published or read
             // regularly.
@@ -35,7 +32,7 @@ namespace ServiceBusQueueProducer
             // create a batch 
             using ServiceBusMessageBatch messageBatch = await sender.CreateMessageBatchAsync();
 
-            for (int i = 1; i <= numOfMessages; i++)
+            for (int i = 1; i <= configuration.NumberOfMessages; i++)
             {
                 // try adding a message to the batch
                 if (!messageBatch.TryAddMessage(new ServiceBusMessage($"Hello, Message {i}")))
@@ -49,7 +46,7 @@ namespace ServiceBusQueueProducer
             {
                 // Use the producer client to send the batch of messages to the Service Bus queue
                 await sender.SendMessagesAsync(messageBatch);
-                Console.WriteLine($"A batch of {numOfMessages} messages has been published to the queue.");
+                Console.WriteLine($"A batch of {configuration.NumberOfMessages} messages has been published to the queue.");
             }
             finally
             {

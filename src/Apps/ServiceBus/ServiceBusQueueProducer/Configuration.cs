@@ -16,5 +16,15 @@ namespace ServiceBusQueueProducer
         public string ConnectionString => config[ConfigurationKeys.ConnectionString];
 
         public string QueueName => config[ConfigurationKeys.QueueName];
+
+        public int NumberOfMessages
+        {
+            get
+            {
+                if (!int.TryParse(config[ConfigurationKeys.NumberOfMessages], out int n))
+                    n = 5;
+                return n;
+            }
+        }
     }
 }
