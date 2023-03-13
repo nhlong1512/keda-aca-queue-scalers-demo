@@ -34,7 +34,7 @@ jobs:
         folder: src/Apps/ServiceBus/ServiceBusQueueProducer
 
     - name: ACR Build Reader
-      id: acrProducer
+      id: acrReader
       uses: azure/acr-build@v1
       with:
         registry: ${{ env.ACR }}
