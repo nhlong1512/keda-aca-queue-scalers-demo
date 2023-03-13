@@ -134,8 +134,15 @@ jobs:
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
           --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
           --out tsv`
+        # Retain only the count of messages
+        MESSAGES=${RESULT##* }
 
-        echo $RESULT
+        if (( $MESSAGES >= 100 )); then
+          echo 'Messages Process: $MESSAGES, Success'
+        else
+          echo 'Messages Process: $MESSAGES, FAILED!'
+          exit 1
+        fi
 
   cleanup:
     name: Clean Up
