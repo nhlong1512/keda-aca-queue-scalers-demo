@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - "./github/workflows/apps.yml"
       - "src/Apps/**"
 
 env:
