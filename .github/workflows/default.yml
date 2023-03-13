@@ -69,7 +69,7 @@ jobs:
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-1" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.connectionString }}"
+          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
           
     - name: Put message 2
       shell: bash
@@ -77,7 +77,7 @@ jobs:
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-2" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.connectionString }}"
+          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
           
     - name: Put message 3
       shell: bash
@@ -85,7 +85,7 @@ jobs:
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-3" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.connectionString }}"
+          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
           
     - name: Put message 4
       shell: bash
@@ -93,7 +93,7 @@ jobs:
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-4" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.connectionString }}"
+          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
           
     - name: Put message 5
       shell: bash
@@ -101,7 +101,7 @@ jobs:
         az storage message put \
           --content "Hello Queue Reader App ${{ matrix.container }}-5" \
           --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.connectionString }}"
+          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
 
   validateStorageQueue:
     name: Validate Storage Queue
