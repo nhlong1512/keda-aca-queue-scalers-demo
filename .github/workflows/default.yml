@@ -43,7 +43,7 @@ jobs:
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/registry.json
         parameters: prefix="${{ env.PREFIX }}"
-        deploymentName: ${{ env.PREFIX }}registry${{ steps.date.outputs.date }} 
+        deploymentName: ${{ env.PREFIX }}registry-${{ steps.date.outputs.date }} 
 
     - name: ACR Build Service Bus Queue Producer
       run: |
@@ -70,6 +70,10 @@ jobs:
       serviceBusName: ${{ steps.deploy.outputs.serviceBusName }}
       serviceBusKey: ${{ steps.deploy.outputs.serviceBusKey }}
     steps:
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+
     - uses: actions/checkout@master
 
     - name: Azure authentication
@@ -91,6 +95,7 @@ jobs:
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/master.json
         parameters: prefix="${{ env.PREFIX }}" registryName="${{ needs.build.outputs.registryName }}"
+        deploymentName: ${{ env.PREFIX }}master-${{ steps.date.outputs.date }}
 
     - name: check outputs
       run: |
