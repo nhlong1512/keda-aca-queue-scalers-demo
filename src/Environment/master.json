@@ -9,10 +9,12 @@
         "timestamp": {
             "type": "String",
             "defaultValue": "[utcNow('yyyyMMdd')]"
+        },
+        "registryName": {
+            "type": "String"
         }
     },
     "variables": {
-        "registryName": "[replace(concat(parameters('prefix'), 'acr', parameters('timestamp')), '-','')]",
         "registrySku": "Standard",
         "logAnalyticsWorkspaceName": "[concat(parameters('prefix'), 'loganalytics')]",
         "logAnalyticsWorkspaceSku": "pergb2018",
@@ -21,18 +23,6 @@
         "baseNestedTemplateUrl": "https://raw.githubusercontent.com/roberto-mardeni/keda-aca-queue-scalers-demo/master/src/Environment/"
     },
     "resources": [
-        {
-            "type": "Microsoft.ContainerRegistry/registries",
-            "sku": {
-                "name": "[variables('registrySku')]"
-            },
-            "name": "[variables('registryName')]",
-            "apiVersion": "2017-10-01",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "adminUserEnabled": true
-            }
-        },
         {
             "apiVersion": "2021-06-01",
             "name": "[variables('logAnalyticsWorkspaceName')]",
@@ -65,7 +55,6 @@
             "name": "azureContainerAppsEnvironment",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "[concat('Microsoft.ContainerRegistry/registries/', variables('registryName'))]",
                 "[concat('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]",
                 "[concat('Microsoft.Insights/components/', variables('appInsightsName'))]"
             ],
@@ -121,24 +110,15 @@
                 "parameters": {
                     "environmentName": {
                         "value": "[variables('containerAppsEnvironmentName')]"
+                    },
+                    "registryName": {
+                        "value": "[parameters('registryName')]"
                     }
                 }
             }
         }
     ],
     "outputs": {
-        "registryName": {
-            "type": "String",
-            "value": "[variables('registryName')]"
-        },
-        "registryUsername": {
-            "type": "String",
-            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').username]"
-        },
-        "registryPassword": {
-            "type": "String",
-            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').passwords[0].value]"
-        },
         "logAnalyticsWorkspaceName": {
             "type": "String",
             "value": "[variables('logAnalyticsWorkspaceName')]"

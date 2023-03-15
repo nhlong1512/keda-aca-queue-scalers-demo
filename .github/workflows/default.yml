@@ -90,7 +90,7 @@ jobs:
         subscriptionId: ${{ env.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/master.json
-        parameters: prefix="${{ env.PREFIX }}"
+        parameters: prefix="${{ env.PREFIX }}" registryName="${{ needs.build.outputs.registryName }}"
 
     - name: check outputs
       run: |
