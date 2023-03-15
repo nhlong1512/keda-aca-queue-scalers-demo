@@ -52,7 +52,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "azureContainerAppsEnvironment",
+            "name": "[concat(deployment().name, '-acae')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "[concat('Microsoft.OperationalInsights/workspaces/', variables('logAnalyticsWorkspaceName'))]",
@@ -76,10 +76,10 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "storageAccountQueueReader",
+            "name": "[concat(deployment().name, '-saqr')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "azureContainerAppsEnvironment"
+                "[concat(deployment().name, '-acae')]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -96,10 +96,10 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "serviceBusQueueReader",
+            "name": "[concat(deployment().name, '-sbqr')]",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
-                "azureContainerAppsEnvironment"
+                "[concat(deployment().name, '-acae')]"
             ],
             "properties": {
                 "mode": "Incremental",
