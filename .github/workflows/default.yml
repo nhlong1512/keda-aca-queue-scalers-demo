@@ -9,22 +9,20 @@ on:
       - "src/Apps/**"
 
 env:
+  PREFIX: keda-demo-
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
-  PREFIX: keda-demo-
 
 jobs:
-  provision:
-    name: Provision
+  build:
+    name: Build and Push Docker images
     runs-on: ubuntu-latest
-    outputs:
-      queueName: ${{ steps.deploy.outputs.queueName }}
-      queueStorageAccountName: ${{ steps.deploy.outputs.queueStorageAccountName }}
-      queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
-      serviceBusName: ${{ steps.deploy.outputs.serviceBusName }}
-      serviceBusKey: ${{ steps.deploy.outputs.serviceBusKey }}
     steps:
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
+
     - uses: actions/checkout@master
 
     - name: Azure authentication
@@ -44,144 +42,20 @@ jobs:
       with:
         subscriptionId: ${{ env.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUP }}
-        template: ./src/Environment/master.json
+        template: ./src/Environment/registry.json
         parameters: prefix="${{ env.PREFIX }}"
+        deploymentName: ${{ env.PREFIX }}registry${{ steps.date.outputs.date }} 
 
-    - name: check outputs
+    - name: ACR Build Service Bus Queue Producer
       run: |
-        echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
-        echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
-        echo "Storage Account Connection String: ${{ steps.deploy.outputs.storageAccountConnectionString }}"
-
-  testStorageQueue:
-    name: Test Storage Queue
-    needs:  [provision]
-    runs-on: ubuntu-latest
-    outputs:
-      startDate: ${{ steps.date.outputs.date }}
-    strategy:
-      fail-fast: false
-      matrix:
-        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    steps:
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
-
-    - name: Put message 1
-      shell: bash
+        cd src/Apps/ServiceBus
+        az acr build --image service-bus/queue-producer:latest \
+          --registry ${{ steps.deploy.outputs.registryName }} \
+          --file ServiceBusQueueProducer/Dockerfile .
+ 
+    - name: ACR Build Service Bus Queue Reader
       run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-1" \
-          --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 2
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-2" \
-          --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 3
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-3" \
-          --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 4
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-4" \
-          --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 5
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-5" \
-          --queue-name "${{ needs.provision.outputs.queueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-
-  validateStorageQueue:
-    name: Validate Storage Queue
-    needs: [testStorageQueue]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Azure authentication
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Check Metrics
-      run: |
-        az config set extension.use_dynamic_install=yes_without_prompt
-        az provider register --namespace Microsoft.App
-        az provider register --namespace Microsoft.OperationalInsights
-
-        NAME=$PREFIX"acae"
-        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
-
-        RESULT=`az monitor log-analytics query \
-          --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
-          --out tsv`
-        # Compare the number after the text PrimaryResult
-        MESSAGES=${RESULT:14:3}
-        if [ "$MESSAGES" -ge 100 ]; then
-          echo "Messages Processed: $MESSAGES, Success"
-        else
-          echo "Messages Processed: $MESSAGES, FAILED!"
-          exit 1
-        fi
-
-  testServiceBusQueue:
-    name: Test Service Bus Queue
-    needs:  [provision]
-    runs-on: ubuntu-latest
-    outputs:
-      startDate: ${{ steps.date.outputs.date }}
-    strategy:
-      fail-fast: false
-      matrix:
-        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    steps:
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
-
-    - name: Put message 1
-      shell: bash
-      run: |
-        curl -X POST -H "Content-Type: application/json" \
-          -H "Authorization: SharedAccessSignature sr=${{ needs.provision.outputs.serviceBusName }}&sig=${{ needs.provision.outputs.serviceBusKey }}&se=1404256819&skn=RootManageSharedAccessKey" \
-          -d '{"message": "Hello Queue Reader App ${{ matrix.container }}-1"}' \
-          https://${{ needs.provision.outputs.serviceBusName }}.servicebus.windows.net/myqueue/messages
-
-  cleanup:
-    name: Clean Up
-    needs: [testServiceBusQueue, validateStorageQueue]
-    runs-on: ubuntu-latest
-    environment: 'cleanup'
-    steps:
-    - name: Azure authentication
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Delete Log Analytics Workspace
-      continue-on-error: true
-      run: |
-        az monitor log-analytics workspace delete -g ${{ env.RESOURCEGROUP }} \
-          --workspace-name ${{ env.LOGANALYTICSWORKSPACENAME }} \
-          --force true --yes
-
-    - name: Delete Resource Group
-      continue-on-error: true
-      run: |
-        az group delete -g ${{ env.RESOURCEGROUP }} --yes
+        cd src/Apps/ServiceBus
+        az acr build --image service-bus/queue-reader:latest \
+          --registry ${{ steps.deploy.outputs.registryName }} \
+          --file ServiceBusQueueReader/Dockerfile .
