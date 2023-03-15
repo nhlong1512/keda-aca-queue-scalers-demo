@@ -125,19 +125,19 @@
         },
         "storageAccountConnectionString": {
             "type": "String",
-            "value": "[reference(concat(deployment().name, '-acae'), '2017-05-10').outputs.storageAccountConnectionString.value]"
+            "value": "[reference('Microsoft.Resources/deployments', concat(deployment().name, '-saqr'), '2017-05-10').outputs.storageAccountConnectionString.value]"
         },
         "storageQueueAccountName": {
             "type": "String",
-            "value": "[reference(concat(deployment().name, '-acae'), '2017-05-10').outputs.storageAccountName.value]"
+            "value": "[reference('Microsoft.Resources/deployments', concat(deployment().name, '-saqr'), '2017-05-10').outputs.storageAccountName.value]"
         },
         "storageQueueName": {
             "type": "String",
-            "value": "[reference(concat(deployment().name, '-acae'), '2017-05-10').outputs.queueName.value]"
+            "value": "[reference('Microsoft.Resources/deployments', concat(deployment().name, '-saqr'), '2017-05-10').outputs.queueName.value]"
         },
         "serviceBusName": {
             "type": "String",
-            "value": "[reference(concat(deployment().name, '-sbqr'), '2017-05-10').outputs.serviceBusName.value]"
+            "value": "[reference('Microsoft.Resources/deployments', concat(deployment().name, '-sbqr'), '2017-05-10').outputs.serviceBusName.value]"
         }
     }
 }
