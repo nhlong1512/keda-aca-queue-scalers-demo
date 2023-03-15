@@ -104,17 +104,13 @@
             "type": "String",
             "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.storageAccountConnectionString.value]"
         },
-        "queueStorageAccountName": {
+        "storageQueueAccountName": {
             "type": "String",
             "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.storageAccountName.value]"
         },
-        "queueName": {
+        "storageQueueName": {
             "type": "String",
             "value": "[reference('storageAccountQueueReader', '2017-05-10').outputs.queueName.value]"
-        },
-        "serviceBusConnectionString": {
-            "type": "String",
-            "value": "[reference('serviceBusQueueReader', '2017-05-10').outputs.serviceBusConnectionString.value]"
         }
     }
 }
