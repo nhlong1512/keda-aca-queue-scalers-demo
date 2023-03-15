@@ -33,14 +33,6 @@
         "registryName": {
             "type": "String",
             "value": "[variables('registryName')]"
-        },
-        "registryUsername": {
-            "type": "String",
-            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').username]"
-        },
-        "registryPassword": {
-            "type": "String",
-            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').passwords[0].value]"
         }
     }
 }
