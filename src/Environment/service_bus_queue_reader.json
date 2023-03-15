@@ -9,16 +9,19 @@
             "type": "String",
             "defaultValue": "[concat('sb',uniqueString(resourceGroup().id))]"
         },
-        "producerName":{
+        "registryName": {
+            "type": "String"
+        },
+        "containerAppName": {
             "type": "String",
-            "defaultValue": "[concat('sbp',utcNow('yyyyMMddHHmmss'))]"
+            "defaultValue": "servicebusqueuereader"
         }
     },
     "variables": {
-        "registryName": "ramardeni",
         "queueName": "myqueue",
         "serviceBusDefaultSASKeyName": "RootManageSharedAccessKey",
-        "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), variables('serviceBusDefaultSASKeyName'))]"
+        "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), variables('serviceBusDefaultSASKeyName'))]",
+        "acrPullRole": "[resourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]"
     },
     "resources": [
         {
@@ -45,54 +48,25 @@
             "type": "Microsoft.ServiceBus/namespaces"
         },
         {
-            "type": "Microsoft.ContainerInstance/containerGroups",
-            "apiVersion": "2022-10-01-preview",
-            "name": "[parameters('producerName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusName'))]"
-            ],
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2022-01-31-preview",
+            "name": "[format('id-{0}', parameters('containerAppName'))]",
+            "location": "[resourceGroup().location]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))), variables('acrPullRole'))]",
             "properties": {
-                "sku": "Standard",
-                "containers": [
-                    {
-                        "name": "[parameters('producerName')]",
-                        "properties": {
-                            "image": "ramardeni.azurecr.io/service-bus/queue-producer:8046b5f2",
-                            "ports": [],
-                            "environmentVariables": [
-                                {
-                                    "name": "ConnectionString",
-                                    "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
-                                },
-                                {
-                                    "name": "QueueName",
-                                    "value": "myqueue"
-                                },
-                                {
-                                    "name": "NumberOfMessages",
-                                    "value": "100"
-                                }
-                            ],
-                            "resources": {
-                                "requests": {
-                                    "memoryInGB": 2,
-                                    "cpu": 1
-                                }
-                            }
-                        }
-                    }
-                ],
-                "initContainers": [],
-                "imageRegistryCredentials": [
-                    {
-                        "server": "[concat(variables('registryName'),'.azurecr.io')]",
-                        "username": "[variables('registryName')]",
-                        "password": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('registryName')), '2023-01-01-preview').passwords[0].value]"
-                    }
-                ],
-                "osType": "Linux",
-                "restartPolicy": "Never"
+                "roleDefinitionId": "[variables('acrPullRole')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName')))).principalId]",
+                "principalType": "ServicePrincipal"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName')))]"
+            ],
+            "metadata": {
+                "description": "This allows the managed identity of the container app to access the registry, note scope is applied to the wider ResourceGroup not the ACR"
             }
         },
         {
@@ -101,6 +75,15 @@
             "apiVersion": "2022-03-01",
             "kind": "containerapp",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))), variables('acrPullRole')))]"
+            ],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))))]": {}
+                }
+            },
             "properties": {
                 "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
                 "configuration": {
@@ -110,12 +93,18 @@
                             "name": "queueconnection",
                             "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
                         }
+                    ],
+                    "registries": [
+                        {
+                            "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName')))]",
+                            "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', parameters('registryName'))).outputs.loginServer.value]"
+                        }
                     ]
                 },
                 "template": {
                     "containers": [
                         {
-                            "image": "ramardeni.azurecr.io/service-bus/queue-reader:8046b5f2",
+                            "image": "[concat(parameters('registryName'),'.azurecr.io/service-bus/queue-reader')]",
                             "name": "queuereader",
                             "env": [
                                 {

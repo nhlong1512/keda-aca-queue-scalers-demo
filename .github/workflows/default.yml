@@ -15,6 +15,8 @@ jobs:
   build:
     name: Build and Push Docker images
     runs-on: ubuntu-latest
+    outputs:
+      registryName: ${{ steps.deploy.outputs.registryName }}
     steps:
     - name: Get current date
       id: date
@@ -56,3 +58,42 @@ jobs:
         az acr build --image service-bus/queue-reader:latest \
           --registry ${{ steps.deploy.outputs.registryName }} \
           --file ServiceBusQueueReader/Dockerfile .
+
+  provision:
+    name: Provision
+    runs-on: ubuntu-latest
+    needs: [build]
+    outputs:
+      queueName: ${{ steps.deploy.outputs.queueName }}
+      queueStorageAccountName: ${{ steps.deploy.outputs.queueStorageAccountName }}
+      queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
+      serviceBusName: ${{ steps.deploy.outputs.serviceBusName }}
+      serviceBusKey: ${{ steps.deploy.outputs.serviceBusKey }}
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Azure authentication
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Create Azure Resource Group
+      run: |
+        if [ $(az group exists --name ${{ env.RESOURCEGROUP }}) = false ]; then
+          az group create -n ${{ env.RESOURCEGROUP }} -l ${{ env.LOCATION }}
+        fi
+
+    - uses: azure/arm-deploy@v1
+      name: Create Azure Resources
+      id: deploy
+      with:
+        subscriptionId: ${{ env.SUBSCRIPTIONID }}
+        resourceGroupName: ${{ env.RESOURCEGROUP }}
+        template: ./src/Environment/master.json
+        parameters: prefix="${{ env.PREFIX }}"
+
+    - name: check outputs
+      run: |
+        echo "Queue Name: ${{ steps.deploy.outputs.queueName }}"
+        echo "Queue Storage Account: ${{ steps.deploy.outputs.queueStorageAccountName }}"
+        echo "Storage Account Connection String: ${{ steps.deploy.outputs.storageAccountConnectionString }}"
