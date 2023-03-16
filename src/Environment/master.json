@@ -127,10 +127,6 @@
             "type": "String",
             "value": "[reference(concat(deployment().name, '-saqr'), '2017-05-10').outputs.storageAccountConnectionString.value]"
         },
-        "storageQueueAccountName": {
-            "type": "String",
-            "value": "[reference(concat(deployment().name, '-saqr'), '2017-05-10').outputs.storageAccountName.value]"
-        },
         "storageQueueName": {
             "type": "String",
             "value": "[reference(concat(deployment().name, '-saqr'), '2017-05-10').outputs.queueName.value]"
