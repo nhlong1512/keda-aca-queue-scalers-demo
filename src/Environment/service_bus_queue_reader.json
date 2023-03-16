@@ -19,8 +19,6 @@
     },
     "variables": {
         "queueName": "myqueue",
-        "serviceBusDefaultSASKeyName": "RootManageSharedAccessKey",
-        "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), variables('serviceBusDefaultSASKeyName'))]",
         "acrPullRole": "[resourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]"
     },
     "resources": [
@@ -28,6 +26,7 @@
             "apiVersion": "2017-04-01",
             "location": "[resourceGroup().location]",
             "name": "[parameters('serviceBusName')]",
+            "properties": {},
             "resources": [
                 {
                     "apiVersion": "2017-04-01",
@@ -91,7 +90,7 @@
                     "secrets": [
                         {
                             "name": "queueconnection",
-                            "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+                            "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
                         }
                     ],
                     "registries": [
@@ -123,7 +122,7 @@
                         "maxReplicas": 10,
                         "rules": [
                             {
-                                "name": "myqueuerule",
+                                "name": "azure-servicebus-queue-rule",
                                 "custom": {
                                     "type": "azure-servicebus",
                                     "metadata": {
@@ -153,7 +152,7 @@
         },
         "serviceBusConnectionString": {
             "type": "string",
-            "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+            "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]"
         }
     }
 }
