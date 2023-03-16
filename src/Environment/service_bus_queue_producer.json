@@ -7,7 +7,7 @@
         },
         "containerAppName": {
             "type": "String",
-            "defaultValue": "[concat('sbqp',uniqueString(resourceGroup().id))]"
+            "defaultValue": "[concat('sbqp', utcNow('yyyyMMdd'))]"
         },
         "serviceBusName": {
             "type": "String"
