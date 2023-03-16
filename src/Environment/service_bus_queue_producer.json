@@ -5,7 +5,7 @@
         "registryName": {
             "type": "String"
         },
-        "containerAppName":{
+        "containerAppName": {
             "type": "String",
             "defaultValue": "servicebusqueueproducer"
         },
@@ -85,6 +85,12 @@
                                 }
                             }
                         }
+                    }
+                ],
+                "imageRegistryCredentials": [
+                    {
+                        "server": "[concat(parameters('registryName'),'.azurecr.io')]",
+                        "identity": "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))))]"
                     }
                 ],
                 "initContainers": [],
