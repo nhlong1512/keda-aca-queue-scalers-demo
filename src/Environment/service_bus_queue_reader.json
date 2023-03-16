@@ -18,6 +18,7 @@
         }
     },
     "variables": {
+        "appName": "servicebusqueuereader",
         "queueName": "myqueue",
         "acrPullRole": "[resourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]"
     },
@@ -69,7 +70,7 @@
             }
         },
         {
-            "name": "servicebusqueuereader",
+            "name": "[variables('appName')]",
             "type": "Microsoft.App/containerApps",
             "apiVersion": "2022-03-01",
             "kind": "containerapp",
@@ -104,7 +105,7 @@
                     "containers": [
                         {
                             "image": "[concat(parameters('registryName'),'.azurecr.io/service-bus/queue-reader')]",
-                            "name": "queuereader",
+                            "name": "[variables('appName')]",
                             "env": [
                                 {
                                     "name": "ConnectionString",

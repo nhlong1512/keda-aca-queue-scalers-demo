@@ -11,6 +11,7 @@
         }
     },
     "variables": {
+        "appName": "storagequeuereader",
         "queueName": "myqueue"
     },
     "resources": [
@@ -70,7 +71,7 @@
             }
         },
         {
-            "name": "storagequeuereader",
+            "name": "[variables('appName')]",
             "type": "Microsoft.App/containerApps",
             "apiVersion": "2022-03-01",
             "kind": "containerapp",
@@ -90,7 +91,7 @@
                     "containers": [
                         {
                             "image": "mcr.microsoft.com/azuredocs/containerapps-queuereader",
-                            "name": "queuereader",
+                            "name": "[variables('appName')]",
                             "env": [
                                 {
                                     "name": "QueueName",
