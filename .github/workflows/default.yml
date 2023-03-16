@@ -111,51 +111,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        container: [1] #, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     steps:
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_OUTPUT
 
-    - name: Put message 1
+    - name: Put messages in storage queue
       shell: bash
       run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-1" \
-          --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 2
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-2" \
-          --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 3
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-3" \
-          --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 4
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-4" \
-          --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
-          
-    - name: Put message 5
-      shell: bash
-      run: |
-        az storage message put \
-          --content "Hello Queue Reader App ${{ matrix.container }}-5" \
-          --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
-          --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
+        max=10
+        for ((i=1; i<=max; i++)); do
+          az storage message put \
+            --content "Hello Queue Reader App ${{ matrix.container }}-$i" \
+            --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
+            --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
+        done
 
   validateStorageQueue:
     name: Validate Storage Queue
