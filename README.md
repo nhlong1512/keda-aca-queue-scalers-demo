@@ -8,14 +8,15 @@ Demo for Kubernetes Event Driven Architecture with Azure Containers Apps and Que
 
 This repository contains a workflow that performs the following actions:
 
-- Provision an [Azure Container Registry][acr]
-- Build and deploy Service Bus Queue Producer and Reader container images using the previously deployed registry
+- Provision an [Azure Container Registry][acr] and build 2 container images:
+  - Service Bus Queue Producer: publishes a number of messages in batch to a Service Bus Queue
+  - Service Bus Queue Reader: reads a Service Bus Queue messages and logs its ID and content
 - Provision an [Azure Container Apps Environment][aca] with 2 applications:
   - Storage Queue Reader, from public [Microsoft Artifact Registry][mcr]
   - Service Bus Queue Reader, from the previously deployed [Azure Container Registry][acr]
 - Performs tests by putting messages in the corresponding queues:
   - Using the [Azure CLI][cli] for [Storage Queue][asq]
-  - Using a Service Bus Queue Producer application hosted in an [Azure Container Instance][aci]
+  - Using the Service Bus Queue Producer application hosted in an [Azure Container Instance][aci]
 - Validates the expected number of messages have been processed via query to [Log Analytics Workspace][law]
 - Destroy the resouce group where all resources were provisioned
 
