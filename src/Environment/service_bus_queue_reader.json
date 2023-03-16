@@ -129,7 +129,8 @@
                                     "metadata": {
                                         "queueName": "[variables('queueName')]",
                                         "namespace": "[parameters('serviceBusName')]",
-                                        "messageCount": "2"
+                                        "activationMessageCount": "5",
+                                        "messageCount": "5"
                                     },
                                     "auth": [
                                         {
