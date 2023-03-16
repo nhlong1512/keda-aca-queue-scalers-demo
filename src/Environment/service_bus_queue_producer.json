@@ -1,0 +1,91 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "registryName": {
+            "type": "String"
+        },
+        "containerAppName":{
+            "type": "String",
+            "defaultValue": "servicebusqueueproducer"
+        },
+        "serviceBusName": {
+            "type": "String"
+        }
+    },
+    "variables": {
+        "queueName": "myqueue",
+        "serviceBusDefaultSASKeyName": "RootManageSharedAccessKey",
+        "serviceBusAuthRuleResourceId": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusName'), variables('serviceBusDefaultSASKeyName'))]",
+        "acrPullRole": "[resourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2022-01-31-preview",
+            "name": "[format('id-{0}', parameters('containerAppName'))]",
+            "location": "[resourceGroup().location]"
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))), variables('acrPullRole'))]",
+            "properties": {
+                "roleDefinitionId": "[variables('acrPullRole')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName')))).principalId]",
+                "principalType": "ServicePrincipal"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName')))]"
+            ],
+            "metadata": {
+                "description": "This allows the managed identity of the container app to access the registry, note scope is applied to the wider ResourceGroup not the ACR"
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2022-10-01-preview",
+            "name": "[parameters('containerAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))), variables('acrPullRole')))]"
+            ],
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerAppName')]",
+                        "properties": {
+                            "image": "[concat(parameters('registryName'),'.azurecr.io/service-bus/queue-producer')]",
+                            "ports": [],
+                            "environmentVariables": [
+                                {
+                                    "name": "ConnectionString",
+                                    "value": "[listKeys(variables('serviceBusAuthRuleResourceId'), '2017-04-01').primaryConnectionString]"
+                                },
+                                {
+                                    "name": "QueueName",
+                                    "value": "[variables('queueName')]"
+                                },
+                                {
+                                    "name": "NumberOfMessages",
+                                    "value": "100"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 2,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "osType": "Linux",
+                "restartPolicy": "Never"
+            }
+        }
+    ],
+    "outputs": {}
+}
