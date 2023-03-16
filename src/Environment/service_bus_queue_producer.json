@@ -50,6 +50,12 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))), variables('acrPullRole')))]"
             ],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-{0}', parameters('containerAppName'))))]": {}
+                }
+            },
             "properties": {
                 "sku": "Standard",
                 "containers": [
