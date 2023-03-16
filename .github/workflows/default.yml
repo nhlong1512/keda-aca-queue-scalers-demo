@@ -11,6 +11,7 @@ env:
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
   MAXMESSAGES: 1000
+  SLEEPTIME: 60s
 
 jobs:
   build:
@@ -148,6 +149,8 @@ jobs:
         NAME=$PREFIX"acae"
         LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
+        sleep ${{ env.SLEEPTIME }}
+
         RESULT=`az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
           --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
@@ -211,6 +214,8 @@ jobs:
 
         NAME=$PREFIX"acae"
         LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
+
+        sleep ${{ env.SLEEPTIME }}
 
         RESULT=`az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
