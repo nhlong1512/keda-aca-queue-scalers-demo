@@ -4,6 +4,8 @@ Demo for Kubernetes Event Driven Architecture with Azure Containers Apps and Que
 
 ## Overview
 
+![Solution Diagram](docs/diagram.png)
+
 This repository contains a workflow that performs the following actions:
 
 - Provision an [Azure Container Registry][acr]
