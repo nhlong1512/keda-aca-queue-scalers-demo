@@ -11,6 +11,10 @@
         },
         "serviceBusName": {
             "type": "String"
+        },
+        "numberOfMessages": {
+            "type": "Int",
+            "defaultValue": 1000
         }
     },
     "variables": {
@@ -75,7 +79,7 @@
                                 },
                                 {
                                     "name": "NumberOfMessages",
-                                    "value": "100"
+                                    "value": "[parameters('numberOfMessages')]"
                                 }
                             ],
                             "resources": {

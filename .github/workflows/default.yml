@@ -10,6 +10,7 @@ env:
   SUBSCRIPTIONID: c38893c4-15b8-4925-bad8-f5486addcc7d
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
+  MAXMESSAGES: 1000
 
 jobs:
   build:
@@ -153,7 +154,7 @@ jobs:
           --out tsv`
         # Compare the number after the text PrimaryResult
         MESSAGES=${RESULT:14:3}
-        if [ "$MESSAGES" -ge 1000 ]; then
+        if [ "$MESSAGES" -ge ${{ env.MAXMESSAGES }} ]; then
           echo "Messages Processed: $MESSAGES, Success"
         else
           echo "Messages Processed: $MESSAGES, FAILED!"
@@ -189,7 +190,7 @@ jobs:
         subscriptionId: ${{ env.SUBSCRIPTIONID }}
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/service_bus_queue_producer.json
-        parameters: registryName="${{ needs.build.outputs.registryName }}" serviceBusName="${{ needs.provision.outputs.serviceBusName }}"
+        parameters: registryName="${{ needs.build.outputs.registryName }}" serviceBusName="${{ needs.provision.outputs.serviceBusName }}" numberOfMessages=${{ env.MAXMESSAGES }}
         deploymentName: ${{ env.PREFIX }}sbp-${{ steps.deployDate.outputs.date }}
 
   validateServiceBusQueue:
@@ -217,7 +218,7 @@ jobs:
           --out tsv`
         # Compare the number after the text PrimaryResult
         MESSAGES=${RESULT:14:3}
-        if [ "$MESSAGES" -ge 100 ]; then
+        if [ "$MESSAGES" -ge ${{ env.MAXMESSAGES }} ]; then
           echo "Messages Processed: $MESSAGES, Success"
         else
           echo "Messages Processed: $MESSAGES, FAILED!"
