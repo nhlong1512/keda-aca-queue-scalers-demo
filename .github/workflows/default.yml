@@ -197,6 +197,10 @@ jobs:
     steps:
     - name: Get current date
       id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+    - name: Get current date for deploy
+      id: deployDate
       run: echo "::set-output name=date::$(date +'%Y%m%d%H%M%S')"
 
     - uses: actions/checkout@master
@@ -214,7 +218,7 @@ jobs:
         resourceGroupName: ${{ env.RESOURCEGROUP }}
         template: ./src/Environment/service_bus_queue_producer.json
         parameters: registryName="${{ needs.build.outputs.registryName }}" serviceBusName="${{ needs.provision.outputs.serviceBusName }}"
-        deploymentName: ${{ env.PREFIX }}sbp-${{ steps.date.outputs.date }}
+        deploymentName: ${{ env.PREFIX }}sbp-${{ steps.deployDate.outputs.date }}
 
   validateServiceBusQueue:
     name: Validate Service Bus Queue
@@ -237,7 +241,7 @@ jobs:
 
         RESULT=`az monitor log-analytics query \
           --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'servicebusqueuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
+          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'servicebusqueuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testServiceBusQueue.outputs.startDate }}') | summarize count()" \
           --out tsv`
         # Compare the number after the text PrimaryResult
         MESSAGES=${RESULT:14:3}
