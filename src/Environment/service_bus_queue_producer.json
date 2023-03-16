@@ -7,7 +7,7 @@
         },
         "containerAppName": {
             "type": "String",
-            "defaultValue": "servicebusqueueproducer"
+            "defaultValue": "[concat('sbqp',uniqueString(resourceGroup().id))]"
         },
         "serviceBusName": {
             "type": "String"
