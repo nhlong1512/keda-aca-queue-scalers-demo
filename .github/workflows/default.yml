@@ -12,7 +12,7 @@ env:
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
   MAXMESSAGES: 1000
-  SLEEPTIME: 90s
+  SLEEPTIME: 180s
 
 jobs:
   build:
