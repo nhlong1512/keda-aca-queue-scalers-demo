@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    name: Build and Push Docker images
+    name: Build container images
     runs-on: ubuntu-latest
     outputs:
       registryName: ${{ steps.deploy.outputs.registryName }}
@@ -60,7 +60,7 @@ jobs:
           --file ServiceBusQueueReader/Dockerfile .
 
   provision:
-    name: Provision
+    name: Create Azure Resources
     runs-on: ubuntu-latest
     needs: [build]
     outputs:
