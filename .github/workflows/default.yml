@@ -12,7 +12,7 @@ env:
   RESOURCEGROUP: keda-demo-rg
   LOCATION: eastus
   MAXMESSAGES: 1000
-  SLEEPTIME: 180s
+  SLEEPTIME: 120s
 
 jobs:
   build:
@@ -129,6 +129,10 @@ jobs:
             --content "Hello Queue Reader App ${{ matrix.container }}-$i" \
             --queue-name "${{ needs.provision.outputs.storageQueueName }}" \
             --connection-string "${{ needs.provision.outputs.queueConnectionString }}"
+          # adding a 1s sleep to avoid overwhelming queue
+          if (($i % 5 == 0)); then
+            sleep 1s;
+          fi
         done
 
   validateStorageQueue:
@@ -150,6 +154,7 @@ jobs:
         NAME=$PREFIX"acae"
         LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
+        echo 'Waiting for messages to be processed...'
         sleep ${{ env.SLEEPTIME }}
 
         RESULT=`az monitor log-analytics query \
@@ -216,6 +221,7 @@ jobs:
         NAME=$PREFIX"acae"
         LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
 
+        echo 'Waiting for messages to be processed...'
         sleep ${{ env.SLEEPTIME }}
 
         RESULT=`az monitor log-analytics query \
