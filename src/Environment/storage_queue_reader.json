@@ -82,7 +82,7 @@
                     "secrets": [
                         {
                             "name": "queueconnection",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2022-09-01').keys[0].value, ';BlobEndpoint=https://', parameters('storageAccountName'), '.blob.core.windows.net/;FileEndpoint=https://', parameters('storageAccountName'), '.file.core.windows.net/;QueueEndpoint=https://', parameters('storageAccountName'), '.queue.core.windows.net/;TableEndpoint=https://', parameters('storageAccountName'), '.table.core.windows.net/')]"
                         }
                     ]
                 },
@@ -104,11 +104,11 @@
                         }
                     ],
                     "scale": {
-                        "minReplicas": 1,
+                        "minReplicas": 0,
                         "maxReplicas": 10,
                         "rules": [
                             {
-                                "name": "myqueuerule",
+                                "name": "storage-queue-rule",
                                 "azureQueue": {
                                     "queueName": "[variables('queueName')]",
                                     "queueLength": 2,
