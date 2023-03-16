@@ -17,6 +17,12 @@ This repository contains a workflow that performs the following actions:
 - Validates the expected number of messages have been processed via query to [Log Analytics Workspace][law]
 - Destroy the resouce group where all resources were provisioned
 
+## Required
+
+If you wish to fork and use this repository, you need a secret called **AZURE_CREDENTIALS** with the credentials for a [Service Principal][sp] that will have access to an Azure subscription to deploy the solution, it will require at least Collaborator at the subscription level and will need to be able to create [Managed Identities][msi].
+
+You will also need to update the **SUBSCRIPTIONID** environment variable in the workflow to match the Azure subscription.
+
 [acr]: https://learn.microsoft.com/en-us/azure/container-registry/
 [aca]: https://learn.microsoft.com/en-us/azure/container-apps/
 [mcr]: https://mcr.microsoft.com/
@@ -24,3 +30,5 @@ This repository contains a workflow that performs the following actions:
 [asq]: https://learn.microsoft.com/en-us/azure/storage/queues/
 [aci]: https://learn.microsoft.com/en-us/azure/container-instances/
 [law]: https://learn.microsoft.com/en-us/azure/azure-monitor/logs/log-analytics-workspace-overview
+[sp]: https://learn.microsoft.com/en-us/cli/azure/ad/sp?view=azure-cli-latest#az-ad-sp-create-for-rbac
+[msi]: https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/
