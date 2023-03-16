@@ -120,7 +120,7 @@
                     ],
                     "scale": {
                         "minReplicas": 0,
-                        "maxReplicas": 10,
+                        "maxReplicas": 100,
                         "rules": [
                             {
                                 "name": "azure-servicebus-queue-rule",
