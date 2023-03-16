@@ -190,7 +190,7 @@ jobs:
 
   testServiceBusQueue:
     name: Test Service Bus Queue
-    needs:  [provision]
+    needs:  [build,provision]
     runs-on: ubuntu-latest
     outputs:
       startDate: ${{ steps.date.outputs.date }}
