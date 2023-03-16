@@ -64,6 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     outputs:
+      logAnalyticsWorkspaceName: ${{ steps.deploy.outputs.logAnalyticsWorkspaceName }}
       storageQueueName: ${{ steps.deploy.outputs.storageQueueName }}
       queueConnectionString: ${{ steps.deploy.outputs.storageAccountConnectionString }}
       serviceBusName: ${{ steps.deploy.outputs.serviceBusName }}
@@ -254,7 +255,7 @@ jobs:
 
   cleanup:
     name: Clean Up
-    needs: [validateStorageQueue,validateServiceBusQueue]
+    needs: [provision,validateStorageQueue,validateServiceBusQueue]
     runs-on: ubuntu-latest
     environment: 'cleanup'
     steps:
@@ -267,7 +268,7 @@ jobs:
       continue-on-error: true
       run: |
         az monitor log-analytics workspace delete -g ${{ env.RESOURCEGROUP }} \
-          --workspace-name ${{ env.LOGANALYTICSWORKSPACENAME }} \
+          --workspace-name ${{ needs.provision.outputs.logAnalyticsWorkspaceName }} \
           --force true --yes
 
     - name: Delete Resource Group
