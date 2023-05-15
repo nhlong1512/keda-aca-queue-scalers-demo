@@ -140,6 +140,8 @@ jobs:
     needs: [testStorageQueue]
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@master
+
     - name: Azure authentication
       uses: azure/login@v1
       with:
@@ -185,6 +187,8 @@ jobs:
     needs: [testServiceBusQueue]
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@master
+
     - name: Azure authentication
       uses: azure/login@v1
       with:
