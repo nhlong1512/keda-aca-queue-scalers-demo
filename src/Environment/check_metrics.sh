@@ -5,8 +5,8 @@ acaname=$2"acae"
 appname=$3
 start_date=$4
 maxmessages=$5
-sleeptime=0.25s
-maxtimes=10
+sleeptime=1s
+maxtimes=60
 l=1
 messages=0
 
@@ -30,6 +30,8 @@ do
   ((l++))
 done
 
+echo ""
+
 if [ "$messages" -ge "$maxmessages" ]; then
   echo "Messages processed: $messages, Success!!!"
 else
@@ -37,5 +39,4 @@ else
   exit 1
 fi
 
-echo ""
 echo "done"
