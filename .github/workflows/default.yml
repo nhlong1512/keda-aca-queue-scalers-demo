@@ -146,29 +146,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Check Metrics
-      run: |
-        az config set extension.use_dynamic_install=yes_without_prompt
-        az provider register --namespace Microsoft.App
-        az provider register --namespace Microsoft.OperationalInsights
-
-        NAME=$PREFIX"acae"
-        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
-
-        echo 'Waiting for messages to be processed...'
-        sleep ${{ env.SLEEPTIME }}
-
-        RESULT=`az monitor log-analytics query \
-          --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'storagequeuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testStorageQueue.outputs.startDate }}') | summarize count()" \
-          --out tsv`
-        # Compare the number after the text PrimaryResult
-        MESSAGES=${RESULT:14:5}
-        if [ "$MESSAGES" -ge ${{ env.MAXMESSAGES }} ]; then
-          echo "Messages Processed: $MESSAGES, Success"
-        else
-          echo "Messages Processed: $MESSAGES, FAILED!"
-          exit 1
-        fi
+      run: ./src/Environment/check_metrics.sh '$RESOURCEGROUP' '$PREFIX' 'storagequeuereader' '${{ needs.testStorageQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
 
   testServiceBusQueue:
     name: Test Service Bus Queue
@@ -213,29 +191,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Check Metrics
-      run: |
-        az config set extension.use_dynamic_install=yes_without_prompt
-        az provider register --namespace Microsoft.App
-        az provider register --namespace Microsoft.OperationalInsights
-
-        NAME=$PREFIX"acae"
-        LOG_ANALYTICS_WORKSPACE_CLIENT_ID=`az containerapp env show --name $NAME --resource-group $RESOURCEGROUP --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId --out tsv`
-
-        echo 'Waiting for messages to be processed...'
-        sleep ${{ env.SLEEPTIME }}
-
-        RESULT=`az monitor log-analytics query \
-          --workspace $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
-          --analytics-query "ContainerAppConsoleLogs_CL | where ContainerAppName_s == 'servicebusqueuereader' and Log_s contains 'Message ID' and TimeGenerated > todatetime('${{ needs.testServiceBusQueue.outputs.startDate }}') | summarize count()" \
-          --out tsv`
-        # Compare the number after the text PrimaryResult
-        MESSAGES=${RESULT:14:5}
-        if [ "$MESSAGES" -ge ${{ env.MAXMESSAGES }} ]; then
-          echo "Messages Processed: $MESSAGES, Success"
-        else
-          echo "Messages Processed: $MESSAGES, FAILED!"
-          exit 1
-        fi
+      run: ./src/Environment/check_metrics.sh '$RESOURCEGROUP' '$PREFIX' 'servicebusqueuereader' '${{ needs.testServiceBusQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
 
   cleanup:
     name: Clean Up
