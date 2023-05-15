@@ -148,7 +148,12 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Check Metrics
-      run: ./src/Environment/check_metrics.sh '$RESOURCEGROUP' '$PREFIX' 'storagequeuereader' '${{ needs.testStorageQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
+      run: |
+        az config set extension.use_dynamic_install=yes_without_prompt
+        az provider register --namespace Microsoft.App
+        az provider register --namespace Microsoft.OperationalInsights
+
+        ./src/Environment/check_metrics.sh '${{ env.RESOURCEGROUP }}' '${{ env.PREFIX }}' 'storagequeuereader' '${{ needs.testStorageQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
 
   testServiceBusQueue:
     name: Test Service Bus Queue
@@ -195,7 +200,12 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Check Metrics
-      run: ./src/Environment/check_metrics.sh '$RESOURCEGROUP' '$PREFIX' 'servicebusqueuereader' '${{ needs.testServiceBusQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
+      run: |
+        az config set extension.use_dynamic_install=yes_without_prompt
+        az provider register --namespace Microsoft.App
+        az provider register --namespace Microsoft.OperationalInsights
+
+        ./src/Environment/check_metrics.sh '${{ env.RESOURCEGROUP }}' '${{ env.PREFIX }}' 'servicebusqueuereader' '${{ needs.testServiceBusQueue.outputs.startDate }}' '${{ env.MAXMESSAGES }}'
 
   cleanup:
     name: Clean Up

@@ -5,11 +5,6 @@ acaname=$2"acae"
 appname=$3
 start_date=$4
 maxmessages=$5
-
-az config set extension.use_dynamic_install=yes_without_prompt
-az provider register --namespace Microsoft.App
-az provider register --namespace Microsoft.OperationalInsights
-
 sleeptime=0.25s
 maxtimes=10
 l=1
